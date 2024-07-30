@@ -1,0 +1,536 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+<assembly><name>Interval</name></assembly>
+<members>
+<member name="T:GasDay.Core.Functional.WeakDict`2">
+ <summary>
+ copied from https://github.com/louthy/language-ext/blob/master/LanguageExt.Core/Prelude/Prelude_Memoize.cs
+ the LanguageExt version will throw an OutOfMemoryException when external memory pressure is high.  This fixes that
+ Used internally by the memo function.  It wraps a concurrent dictionary that has 
+ its value objects wrapped in a WeakReference<OnFinalise<...>>
+ The OnFinalise type is a private class within WeakDict and does nothing but hold
+ the value and an Action to call when its finalised.  So when the WeakReference is
+ collected by the GC, it forces the finaliser to be called on the OnFinalise object,
+ which in turn executes the action which removes it from the ConcurrentDictionary.  
+ That means that both the key and value are collected when the GC fires rather than 
+ just the value.  Mitigates memory leak of keys.
+ </summary>
+</member>
+<member name="T:GasDay.Core.Functional.OnFinalise`1">
+ <summary>
+ copied from https://github.com/louthy/language-ext/blob/master/LanguageExt.Core/Prelude/Prelude_Memoize.cs
+ the LanguageExt version will throw an OutOfMemoryException when external memory pressure is high.  This fixes that
+ </summary>
+</member>
+<member name="M:GasDay.Core.Functional.Cache.memoize``2(Microsoft.FSharp.Core.FSharpFunc{``0,``1})">
+ <summary>
+ Returns a <c>'a -> 'b</c> that wraps <c>f</c>.  Each time the resulting
+ <c>'a -> 'b</c> is called with a new value, its result is memoized (cached).
+ Subsequent calls use the memoized value.  
+ 
+ Remarks: 
+     Thread-safe and memory-leak safe.  
+ </summary>
+ <remarks>
+ copied from https://github.com/louthy/language-ext/blob/master/LanguageExt.Core/Prelude/Prelude_Memoize.cs
+ the LanguageExt version will throw an OutOfMemoryException when external memory pressure is high.  This fixes that
+ </remarks>
+</member>
+<member name="P:GasDay.Core.Interval.Interval`2.Length">
+ <summary>
+ Returns the length of this Interval. Depending on the definition of Increment, this may or may not correspond to UpperBound - LowerBound
+ </summary>
+</member>
+<member name="P:GasDay.Core.Interval.Interval`2.IsPositive">
+ <summary>
+ Returns true if this Interval is a PositiveInterval
+ </summary>
+</member>
+<member name="P:GasDay.Core.Interval.Interval`2.IsEmpty">
+ <summary>
+ Returns true if this Interval is an EmptyInterval
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.UnionWithSafe(GasDay.Core.Interval.Interval{`0,`1})">
+ <summary>
+ Returns the smallest Interval that contains all the elements of both this Interval and the specified Interval, and no other elements.
+ Returns a SeparateIntervals Error if the Intervals are separated (see <c>ConnectedTo</c>).
+ Also see <c>ConnectTo</c>, which forms an Interval that contains and connects two separated Intervals.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.UnionWith'(GasDay.Core.Interval.Interval{`0,`1})">
+ <summary>
+ See <c>UnionWithSafe</c>.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.SplitBySize(SafetyFirst.Numbers.PositiveInt)">
+ <summary>
+ Divides an Interval into a series of smaller Intervals, each containing a number of elements equal to chunkSize. 
+ If the provided Interval does not evenly divide by the chunkSize, the last Interval produced will contain fewer than chunkSize elements.
+ For example, an Interval <1 to 10> SplitBySize 3 produces Intervals <1 to 3>, <4 to 6>, <7 to 9>, and <10 to 10>
+ If called on an empty Interval, produces an empty Seq.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.Resize(System.Tuple{System.Int32,System.Int32})">
+ <summary>
+ Adjusts the bounds of this PositiveInterval by N units to each corresponding bound.
+ A "unit" is defined by the Increment function, where Incrememt this N would produce a shift of N units.
+ </summary>
+ <param name="lowerBoundAdjustment">The number of discrete units by which the LowerBound will be adjusted. </param>
+ <param name="upperBoundAdjustment">The number of discrete units by which the UpperBound will be adjusted. </param>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.RelativeComplementIn(GasDay.Core.Interval.Interval{`0,`1})">
+ <summary>
+ Compares the calling interval to the provided interval, returning a list of exactly 0 to 2 intervals, 
+ representing the values that exist in the provided interval that do not exist in the calling interval.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.RelationshipTo(GasDay.Core.Interval.Interval{`0,`1})">
+ <summary>
+ Categorizes the relationship of this Interval to the provided Interval in terms of a IntervalRelationship.
+ </summary>
+ <remarks>
+ This is a directional relationship - for example, if this is a SuperInterval of that, then that is necessarily a SubInterval of this.
+ Take care to use the correct direction.
+ </remarks>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.Partition(`0,Microsoft.FSharp.Core.FSharpOption{GasDay.Core.Interval.PivotPartition})">
+ <summary>
+ Splits this interval into a pair of Intervals around a given element.
+ PivotPartition determines which of the resulting intervals to include the pivot element in.
+ PivotPartition defaults to include the given element in both output intervals.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.IsAdjacentTo(GasDay.Core.Interval.Interval{`0,`1})">
+ <summary>
+ Returns true if the specified Interval is strictly adjacent to this Interval.
+ Two Intervals are adjacent if they do not overlap, and no valid elements exist between them.
+ Returns false if the Intervals are separate from each other.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.Intersects(GasDay.Core.Interval.Interval{`0,`1})">
+ <summary>
+ Returns true if this Interval has the same incrementor as the provided Interval, and if both Intervals share at least one element.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.IntersectionWith(GasDay.Core.Interval.Interval{`0,`1})">
+ <summary>
+ Returns the subset Interval of elements that are contained in both this Interval and the specified Interval.
+ Returns an empty Interval if the Intervals do not share any elements.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.Create(`0,`0,`1)">
+   <summary>
+     <para> 
+       An Interval describes a complete, closed, inclusive series of discrete elements between two points. 
+     </para> <para>
+       An Interval is defined by its lower and upper bounds, as well as an Incrementor containing two functions:
+       an "increment" which describes how to iterate through a set of values, and an "isValid" function to determine valid elements.
+       If the bounds of an Interval are the same, the Interval will contain one value, which is equal to that bound.
+       Intervals are generally PositiveIntervals, but may be EmptyIntervals, if their bounds shrink such that the LowerBound > the UpperBound.
+       Some members may only be run on PositiveIntervals, requiring pattern matching on an Interval to run.
+
+       For example, an Interval describing all integers would have an increment of element +1 and an isValid which always returns true, since this Interval can accept any integers.
+
+       For example, an Interval describing all evens would have an increment of element +2 and an isValid of element%2 = 0, rejecting other integers.
+
+       For example, an Interval describing all Saturdays would have an increment of DateTime.AddDays(7) and an isValid which compares the day of week of a given DateTime to a known dayOfWeek.
+   </para>
+   </summary>
+   <remarks> 
+     If describing a custom increment function, bear in mind that the increment must be able to increment any value of 'a appropriately.
+     Operates on the assumption that the type 'b will only have one valid instance, with exactly one kind of incrementor.
+   </remarks>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.ConvexHull(GasDay.Core.Interval.Interval{`0,`1})">
+ <summary>
+ Returns the smallest Interval that contains all the elements of both this Interval and the specified Interval, and any elements in between.
+ Similar to <c>UnionWith'</c>, but includes elements in between the two Intervals, if the Intervals are separated <c>PositiveIntervals</c>.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.Contains(`0)">
+ <summary>
+ Returns true if the specified element is in the set of values allowed by the incrementor, AND
+ is between or equal to the lower and upper bound. 
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.ConnectedTo(GasDay.Core.Interval.Interval{`0,`1})">
+ <summary>
+ Returns true if the specified Interval intersects this interval or if it is adjacent to 
+ this Interval (separated only by a single increment).
+ <c>UnionWith</c> will return a SeparateIntervals Error if and only if this returns false.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.ConnectTo(GasDay.Core.Interval.Interval{`0,`1})">
+ <summary>
+ Returns the smallest Interval that contains all the elements of both this Interval and the specified Interval, and any elements in between.
+ Alias of ConvexHull.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval`2.CanUnionWith(GasDay.Core.Interval.Interval{`0,`1})">
+ <summary>
+ Returns true if the specified Interval intersects this interval or if it is adjacent to 
+ this Interval (separated only by a single increment).
+ <c>UnionWith</c> will return a SeparateIntervals Error if and only if this returns false.
+ </summary>
+</member>
+<member name="T:GasDay.Core.Interval.Interval`2">
+ <summary>
+   <para> 
+     An Interval describes a complete, closed, inclusive series of discrete elements between two points. 
+   </para> <para>
+     An Interval is defined by its lower and upper bounds, as well as an Incrementor containing two functions:
+     an "increment" which describes how to iterate through a set of values, and an "isValid" function to determine valid elements.
+     If the bounds of an Interval are the same, the Interval will contain one value, which is equal to that bound.
+     Intervals are generally PositiveIntervals, but may be EmptyIntervals, if their bounds shrink such that the LowerBound > the UpperBound.
+     Some members may only be run on PositiveIntervals, requiring pattern matching on an Interval to run.
+
+     For example, an Interval describing all integers would have an increment of element +1 and an isValid which always returns true, since this Interval can accept any integers.
+
+     For example, an Interval describing all evens would have an increment of element +2 and an isValid of element%2 = 0, rejecting other integers.
+
+     For example, an Interval describing all Saturdays would have an increment of DateTime.AddDays(7) and an isValid which compares the day of week of a given DateTime to a known dayOfWeek.
+ </para>
+ </summary>
+ <remarks> 
+   If describing a custom increment function, bear in mind that the increment must be able to increment any value of 'a appropriately.
+   Operates on the assumption that the type 'b will only have one valid instance, with exactly one kind of incrementor.
+ </remarks>
+</member>
+<member name="P:GasDay.Core.Interval.PositiveInterval`2.Length">
+<summary>
+ Returns the length of the PositiveInterval, which may not always be equal to UpperBound - LowerBound, depending on how the Increment is defined.
+</summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.UnionWithSafe(GasDay.Core.Interval.PositiveInterval{`0,`1})">
+ <summary>
+ Returns the smallest Interval that contains all the elements of both this Interval and the specified Interval, and no other elements.
+ Returns a SeparateIntervals Error if the Intervals are separated (see <c>ConnectedTo</c>).
+ Also see <c>ConnectTo</c>, which forms an Interval that contains and connects two separated Intervals.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.UnionWith'(GasDay.Core.Interval.PositiveInterval{`0,`1})">
+ <summary>
+ See <c>UnionWithSafe</c>.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.SplitBySize(SafetyFirst.Numbers.PositiveInt)">
+ <summary>
+ Divides a PositiveInterval into a series of smaller intervals, each containing a number of elements equal to chunkSize. 
+ If the provided Interval does not evenly divide by the chunkSize, the last Interval produced will contain fewer than chunkSize elements.
+ For example, an Interval <1 to 10> SplitBySize 3 produces Intervals <1 to 3>, <4 to 6>, <7 to 9>, and <10 to 10>
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.ResizePositive(SafetyFirst.Numbers.NegativeInt,SafetyFirst.Numbers.PositiveInt)">
+ <summary>
+ Adjusts the bounds of this PositiveInterval by N units to each corresponding bound.
+ A "unit" is defined by the Increment function, where Incrememt this N would produce a shift of N units.
+ This adjustment is guaranteed to produce a PositiveInterval, as noted by the input types.
+ </summary>
+ <param name="lowerBoundAdjustment">The number of discrete units by which the LowerBound will be adjusted. </param>
+ <param name="upperBoundAdjustment">The number of discrete units by which the UpperBound will be adjusted. </param>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.Resize(System.Int32,System.Int32)">
+ <summary>
+ Adjusts the bounds of this PositiveInterval by N units to each corresponding bound.
+ A "unit" is defined by the Increment function, where Incrememt this N would produce a shift of N units.
+ </summary>
+ <param name="lowerBoundAdjustment">The number of discrete units by which the LowerBound will be adjusted. </param>
+ <param name="upperBoundAdjustment">The number of discrete units by which the UpperBound will be adjusted. </param>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.RelativeComplementIn(GasDay.Core.Interval.PositiveInterval{`0,`1})">
+ <summary>
+ Compares the calling interval to the provided interval, returning a list of exactly 0 to 2 intervals, 
+ representing the values that exist in the provided interval that do not exist in the calling interval.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.RelationshipTo(GasDay.Core.Interval.PositiveInterval{`0,`1})">
+ <summary>
+ Categorizes the relationship of this Interval to the provided Interval in terms of a IntervalRelationship.
+ </summary>
+ <remarks>
+ This is a directional relationship - for example, if this is a SuperInterval of that, then that is necessarily a SubInterval of this.
+ Take care to use the correct direction.
+ </remarks>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.Partition(`0,Microsoft.FSharp.Core.FSharpOption{GasDay.Core.Interval.PivotPartition})">
+ <summary>
+ Splits this interval into a pair of Intervals around a given element.
+ If the pivot element is in the set of valid elements for this interval,
+ a PivotPartition may optionally be provided to specify which of the lower
+ and upper intervals this element is included in.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.IsAdjacentTo(GasDay.Core.Interval.PositiveInterval{`0,`1})">
+ <summary>
+ Returns true if the specified Interval is strictly adjacent to this Interval.
+ Two Intervals are adjacent if they are disjoint, and the Union and Convex Hull of the Sets of both intervals are the same. 
+ i.e. Two Intervals are adjacent if they are disjoint, but there exist no elements between them.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.Intersects(GasDay.Core.Interval.PositiveInterval{`0,`1})">
+ <summary>
+ Returns true if this Interval contains any elements contained in the specified Interval.
+ Returns false, otherwise.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.IntersectionWith(GasDay.Core.Interval.PositiveInterval{`0,`1})">
+ <summary>
+ Returns the subset Interval of elements that are contained in both this Interval and the specified Interval.
+ Returns an empty Interval if the Intervals do not share any elements.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.Equals(System.Object)">
+<summary>
+Operates on the assumption that the type &apos;b will only have one valid instance, with exactly one kind of incrementor.
+</summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.Create(`0,`0,`1)">
+ <summary>
+   <para> 
+     An Interval describes a complete, closed, inclusive series of discrete elements between two points. 
+   </para> <para>
+     An Interval is defined by its lower and upper bounds, as well as an Incrementor containing two functions:
+     an "increment" which describes how to iterate through a set of values, and an "isValid" function to determine valid elements.
+     If the bounds of an Interval are the same, the Interval will contain one value, which is equal to that bound.
+     Intervals are generally PositiveIntervals, but may be EmptyIntervals, if their bounds shrink such that the LowerBound > the UpperBound.
+     Some members may only be run on PositiveIntervals, requiring pattern matching on an Interval to run.
+
+     For example, an Interval describing all integers would have an increment of element +1 and an isValid which always returns true, since this Interval can accept any integers.
+
+     For example, an Interval describing all evens would have an increment of element +2 and an isValid of element%2 = 0, rejecting other integers.
+
+     For example, an Interval describing all Saturdays would have an increment of DateTime.AddDays(7) and an isValid which compares the day of week of a given DateTime to a known dayOfWeek.
+ </para>
+ </summary>
+ <remarks> 
+   If describing a custom increment function, bear in mind that the increment must be able to increment any value of 'a appropriately.
+   Operates on the assumption that the type 'b will only have one valid instance, with exactly one kind of incrementor.
+ </remarks>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.ConvexHull(GasDay.Core.Interval.PositiveInterval{`0,`1})">
+ <summary>
+ Returns the smallest Interval that contains all the elements of both this Interval and the specified Interval, and any elements in between.
+ Similar to <c>UnionWith'</c>, but includes elements in between the two intervals, if the Intervals are separated.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.Contains(`0)">
+ <summary>
+ Returns true if the specified element is in the set of values allowed by the incrementor, AND
+ is between or equal to the lower and upper bound. 
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.ConnectedTo(GasDay.Core.Interval.PositiveInterval{`0,`1})">
+ <summary>
+ Returns true if the specified Interval intersects this interval or if it is adjacent to 
+ this Interval (separated only by a single increment).
+ <c>UnionWith</c> will return a SeparateIntervals Error if and only if this returns false.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval`2.CanUnionWith(GasDay.Core.Interval.PositiveInterval{`0,`1})">
+ <summary>
+ See <c>ConnectedTo</c>.
+ Returns true if the specified Interval intersects this interval or if it is adjacent to 
+ this Interval (separated only by a single increment).
+ <c>UnionWith</c> will return a SeparateIntervals Error if and only if this returns false.
+ </summary>
+</member>
+<member name="T:GasDay.Core.Interval.PositiveInterval`2">
+<summary>
+Operates on the assumption that the type &apos;b will only have one valid instance, with exactly one kind of incrementor.
+</summary>
+</member>
+<member name="T:GasDay.Core.Interval.Incrementor`1">
+<summary>
+An Incrementor describes the set of valid elements on the provided type &apos;a, as well as how to iterate between these elements. 
+</summary>
+</member>
+<member name="T:GasDay.Core.Interval.ComparisonSign">
+<summary>
+Positive uses compare, and Negative uses (compare * -1)
+</summary>
+</member>
+<member name="T:GasDay.Core.Interval.IntervalRelationship.Disjoint">
+  <remarks>
+  <para> This: (...)......... </para>
+  <para> That: .......(...).. </para>
+  <para> OR: </para>
+  <para> This: .......(...).. </para>
+  <para> That: (...)......... </para>
+  <para> OR: </para>
+  <para> This: .......(...).. </para>
+  <para> That: ..(...)....... </para>
+  </remarks>
+</member>
+<member name="T:GasDay.Core.Interval.IntersectionType.Identical">
+  <remarks>
+  <para> This: ..(......).... </para>
+  <para> That: ..(......).... </para>
+  </remarks>
+</member>
+<member name="T:GasDay.Core.Interval.IntersectionType.SuperInterval">
+  <remarks>
+  <para> This: (......)...... </para>
+  <para> That: ..(...)....... </para>
+  </remarks>
+</member>
+<member name="T:GasDay.Core.Interval.IntersectionType.SubInterval">
+  <remarks>
+  <para> This: ....(...)..... </para>
+  <para> That: ..(......).... </para>
+  </remarks>
+</member>
+<member name="T:GasDay.Core.Interval.IntersectionType.Overlapping">
+  <remarks>
+  <para> This: (...)......... </para>
+  <para> That: ..(...)....... </para>
+  <para> OR: </para>                        
+  <para> This: ....(...)..... </para>
+  <para> That: ..(...)....... </para>
+  </remarks>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval.resizePositive``2(SafetyFirst.Numbers.NegativeInt,SafetyFirst.Numbers.PositiveInt,GasDay.Core.Interval.PositiveInterval{``0,``1})">
+ <summary>
+ Adjusts the bounds of this PositiveInterval by N units to each corresponding bound.
+ A "unit" is defined by the Increment function, where Incrememt this N would produce a shift of N units.
+ This adjustment is guaranteed to produce a PositiveInterval, as noted by the input types.
+ </summary>
+ <param name="lowerBoundAdjustment">The number of discrete units by which the LowerBound will be adjusted. </param>
+ <param name="upperBoundAdjustment">The number of discrete units by which the UpperBound will be adjusted. </param>
+</member>
+<member name="M:GasDay.Core.Interval.PositiveInterval.resize``2(System.Int32,System.Int32,GasDay.Core.Interval.PositiveInterval{``0,``1})">
+ <summary>
+ Adjusts the bounds of this PositiveInterval by N units to each corresponding bound.
+ A "unit" is defined by the Increment function, where Incrememt this N would produce a shift of N units.
+ </summary>
+ <param name="lowerBoundAdjustment">The number of units by which the LowerBound will be adjusted. </param>
+ <param name="upperBoundAdjustment">The number of units by which the UpperBound will be adjusted. </param>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.unionWithSafe``2(GasDay.Core.Interval.Interval{``0,``1},GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Returns the smallest Interval that contains all the elements of both this Interval and the specified Interval, and no other elements.
+ Returns a SeparateIntervals Error if the Intervals are separated (see <c>ConnectedTo</c>).
+ Also see <c>ConnectTo</c>, which forms an Interval that contains and connects two separated Intervals.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.intersectionWith``2(GasDay.Core.Interval.Interval{``0,``1},GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Returns the subset Interval of elements that are contained in both this Interval and the specified Interval.
+ Returns an empty Interval if the Intervals do not share any elements.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.intersects``2(GasDay.Core.Interval.Interval{``0,``1},GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Returns true if this Interval has the same incrementor as the provided Interval, and if both Intervals share at least one element.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.convexHull``2(GasDay.Core.Interval.Interval{``0,``1},GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Returns the smallest Interval that contains all the elements of both this Interval and the specified Interval, and any elements in between.
+ Similar to <c>UnionWith'</c>, but includes elements in between the two Intervals, if the Intervals are separated <c>PositiveIntervals</c>.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.canUnionWith``2(GasDay.Core.Interval.Interval{``0,``1},GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Returns true if there exists an Interval containing only the elements of this and the specified Interval.
+ Returns false if no such Interval exists.
+ <c>UnionWith</c> will return a SeparateIntervals Error if and only if this returns false.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.connectedTo``2(GasDay.Core.Interval.Interval{``0,``1},GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Returns true if the specified Interval intersects this interval or if it is adjacent to 
+ this Interval (separated only by a single increment).
+ <c>UnionWith</c> will return a SeparateIntervals Error if and only if this returns false.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.isAdjacentTo``2(GasDay.Core.Interval.Interval{``0,``1},GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Returns true if the specified Interval is strictly adjacent to this Interval.
+ Two Intervals are adjacent if they are disjoint, and the Union and Convex Hull of the Sets of both intervals are the same. 
+ i.e. Two Intervals are adjacent if they are disjoint, but there exist no elements between them.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.partitionInclusive``2(``0,GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Splits this interval into a pair of Intervals around a given element.
+ The pivoted element will be included in both output intervals.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.partition``2(``0,GasDay.Core.Interval.PivotPartition,GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Splits this interval into a pair of Intervals around a given element.
+ PivotPartition determines which of the resulting intervals to include the pivot element in.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.relativeComplementIn``2(GasDay.Core.Interval.Interval{``0,``1},GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Compares the parameter "callingInterval to the parameter "comparedInterval", returning a list of exactly 0 to 2 intervals, 
+ representing the values that exist in "comparedInterval" that do not exist in "callingInterval".
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.relationshipTo``2(GasDay.Core.Interval.Interval{``0,``1},GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Categorizes the relationship of this Interval to the provided Interval in terms of a IntervalRelationship.
+ </summary>
+ <remarks>
+ This is a directional relationship - for example, if this is a SuperInterval of that, then that is necessarily a SubInterval of this.
+ Take care to use the correct direction.
+ </remarks>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.length``2(GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Returns the length of this Interval. Depending on the definition of Increment, this may or may not correspond to UpperBound - LowerBound
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.splitBySize``2(SafetyFirst.Numbers.PositiveInt,GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Divides an Interval into a series of smaller Intervals, each containing a number of elements equal to chunkSize. 
+ If the provided Interval does not evenly divide by the chunkSize, the last Interval produced will contain fewer than chunkSize elements.
+ For example, an Interval <1 to 10> SplitBySize 3 produces Intervals <1 to 3>, <4 to 6>, <7 to 9>, and <10 to 10>
+ If called on an empty Interval, will produce an empty Seq.
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.resize``2(System.Int32,System.Int32,GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Adjusts the bounds of this PositiveInterval by N units to each corresponding bound.
+ A "unit" is defined by the Increment function, where Increment this N would produce a shift of N units.
+ </summary>
+ <param name="lowerBoundAdjustment">The number of units by which the LowerBound will be adjusted. </param>
+ <param name="upperBoundAdjustment">The number of units by which the UpperBound will be adjusted. </param>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.contains``2(``0,GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Returns true if the specified element falls within the bounds of the Interval. 
+ Returns false if called on an EmptyInterval
+ </summary>
+</member>
+<member name="M:GasDay.Core.Interval.Interval.asPositive``2(GasDay.Core.Interval.Interval{``0,``1})">
+ <summary>
+ Attempts to unwrap an Interval into a PositiveInterval, returning None if the provided Interval is Empty.
+ </summary>
+</member>
+<member name="T:GasDay.Core.CoreIntervals.Interval.Ints.Odds">
+<summary>
+Unit: Every other integer, only valid for odd integers
+</summary>
+</member>
+<member name="T:GasDay.Core.CoreIntervals.Interval.Ints.Evens">
+<summary>
+Unit: Every other integer, only valid for even integers
+</summary>
+</member>
+<member name="T:GasDay.Core.CoreIntervals.Interval.Ints.Consecutive">
+<summary>
+The default unit of an Ints Interval - Integers by one. 
+Ints.Consecutive.Of and other incrementor methods may be shortened to simply Ints.Of to reflect the common use case of this incrementor type.
+</summary>
+</member>
+<member name="T:GasDay.Core.CoreIntervals.Interval.LocalDates.ByDay">
+<summary>
+The default unit of a LocalDates Interval - LocalDates separated by one calendar day. 
+LocalDates.ByDay.Of may be shortened to simply LocalDates.Of to reflect the common use case of this unit type, as with other methods of this incrementor
+</summary>
+</member>
+</members>
+</doc>
